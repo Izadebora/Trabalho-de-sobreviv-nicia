@@ -4,6 +4,7 @@
 
 library(tidyverse)
 library(survival)
+library(AdequacyModel)
 
 #### DADOS ####
 
@@ -78,16 +79,17 @@ legend(
   bty = "n",
   cex = 0.8
 )
-# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.01) e do 
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
 # grafico de sobrevivencia, existe evidencia de que ao menos uma categoria desta
 # variavel difere das demais, portanto deve ser considerada para analises futuras.
-
+# Uma coisa interessante e que existe "duplas" no grafico, mostrando que duas duplas
+# de categorias tem comportamentos muito parecidos
 
 ## LUZ ##
 
 km_luz <- survfit(Surv(Time, Event) ~ Light_Cat, data = tree, conf.int = F)
 summary(km_luz)
-teste_especie <- survdiff(Surv(Time, Event) ~ Species, data = tree, rho = 1); teste_especie
+teste_luz <- survdiff(Surv(Time, Event) ~ Light_Cat, data = tree); teste_luz
 plot(km_luz, conf.int = F, col = rainbow(3), lty = 2)
 legend(
   "bottomleft",
@@ -97,5 +99,203 @@ legend(
   bty = "n",
   cex = 0.8
 )
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor = 0.1) e do 
+# grafico de sobrevivencia, existe evidencia, apesar de pouca, de que ao menos uma categoria desta
+# variavel difere das demais, portanto deve ser considerada para analises futuras.
 
-#
+## CORE ##
+
+km_core <- survfit(Surv(Time, Event) ~ Core, data = tree, conf.int = F)
+summary(km_core)
+teste_core <- survdiff(Surv(Time, Event) ~ Core, data = tree); teste_core
+plot(km_core, conf.int = F, col = rainbow(2), lty = 2)
+legend(
+  "bottomleft",
+  legend = levels(as.factor(tree$Core)),
+  col = rainbow(2),
+  lty = 2,
+  bty = "n",
+  cex = 0.8
+)
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# grafico de sobrevivencia, existe evidencia de que as categorias desta
+# variavel diferem, portanto deve ser considerada para analises futuras.
+
+## SOLO ##
+
+km_solo <- survfit(Surv(Time, Event) ~ Soil, data = tree, conf.int = F)
+summary(km_solo)
+teste_solo <- survdiff(Surv(Time, Event) ~ Soil, data = tree); teste_solo
+plot(km_solo, conf.int = F, col = rainbow(7), lty = 2)
+legend(
+  "bottomleft",
+  legend = levels(as.factor(tree$Soil)),
+  col = rainbow(7),
+  lty = 2,
+  bty = "n",
+  cex = 0.8
+)
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# grafico de sobrevivencia, existe evidencia de que ao menos uma categoria desta
+# variavel difere das demais, portanto deve ser considerada para analises futuras.
+
+## ADULT ??? ##
+
+## ESTERELIZACAO ##
+
+km_este <- survfit(Surv(Time, Event) ~ Sterile, data = tree, conf.int = F)
+summary(km_este)
+teste_este <- survdiff(Surv(Time, Event) ~ Sterile, data = tree); teste_este
+plot(km_este, conf.int = F, col = rainbow(2), lty = 2)
+legend(
+  "bottomleft",
+  legend = levels(as.factor(tree$Sterile)),
+  col = rainbow(2),
+  lty = 2,
+  bty = "n",
+  cex = 0.8
+)
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# grafico de sobrevivencia, existe evidencia de que as categorias desta
+# variavel diferem, portanto deve ser considerada para analises futuras.
+
+## CONSPECIFIC ##
+
+km_conspecific <- survfit(Surv(Time, Event) ~ Conspecific, data = tree, conf.int = F)
+summary(km_conspecific)
+teste_conspecific <- survdiff(Surv(Time, Event) ~ Conspecific, data = tree); teste_conspecific
+plot(km_conspecific, conf.int = F, col = rainbow(3), lty = 2)
+legend(
+  "bottomleft",
+  legend = levels(as.factor(tree$Conspecific)),
+  col = rainbow(2),
+  lty = 2,
+  bty = "n",
+  cex = 0.8
+)
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# grafico de sobrevivencia, existe evidencia de que ao menos uma categoria desta
+# variavel difere das demais, portanto deve ser considerada para analises futuras.
+
+## MYCO ##
+
+km_myco <- survfit(Surv(Time, Event) ~ Myco, data = tree, conf.int = F)
+summary(km_myco)
+teste_myco <- survdiff(Surv(Time, Event) ~ Myco , data = tree); teste_myco
+plot(km_myco, conf.int = F, col = rainbow(2), lty = 2)
+legend(
+  "bottomleft",
+  legend = levels(as.factor(tree$Myco)),
+  col = rainbow(2),
+  lty = 2,
+  bty = "n",
+  cex = 0.8
+)
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# grafico de sobrevivencia, existe evidencia de que as categorias desta
+# variavel diferem, portanto deve ser considerada para analises futuras.
+
+## SOILMYCO ##
+
+km_soilmyco <- survfit(Surv(Time, Event) ~ SoilMyco, data = tree, conf.int = F)
+summary(km_soilmyco)
+teste_soilmyco <- survdiff(Surv(Time, Event) ~ SoilMyco, data = tree); teste_soilmyco
+plot(km_soilmyco, conf.int = F, col = rainbow(3), lty = 2)
+legend(
+  "bottomleft",
+  legend = levels(as.factor(tree$SoilMyco)),
+  col = rainbow(3),
+  lty = 2,
+  bty = "n",
+  cex = 0.8
+)
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# grafico de sobrevivencia, existe evidencia de que ao menos uma categoria desta
+# variavel difere das demais, portanto deve ser considerada para analises futuras.
+
+### CONCLUSAO DA ANALISE DESCRITIVA E EXPLORATORIA ###
+
+#### MODELAGEM ####
+
+### ESTIMACAO ###
+
+## SURVREG ##
+
+modelo_weibull <- survreg(Surv(Time, Event) ~ 1, data = tree, dist = "weibull"); summary(modelo_weibull)
+
+## METODO GRAFICO ##
+
+# TEMPO #
+
+tempo <- seq(0, max(tree$Time))
+
+# WEIBULL #
+
+gammaW <- 1/modelo_weibull$scale
+alphaW <- exp(coef(modelo_weibull))
+
+sW <- exp(-(tempo/alphaW)^gammaW)
+
+# GAMMA #
+
+# GRAFICO DE COMPARACAO #
+
+plot(km,
+     conf.int = FALSE,
+     xlab = "Tempo",
+     ylab = "S(t)",
+     col = "black",
+     lwd = 2)
+
+lines(tempo, sW, col = "blue", lwd = 2)
+#lines(tempo, sG, col = "purple", lwd = 2)
+
+legend("topright",
+       legend = c("Kaplan-Meier",
+                  "Weibull"),
+       col = c("black",
+               "blue"),
+       lwd = 2,
+       bty = "n")
+
+## AIC, BIC, AICc ##
+
+# AIC e BIC #
+
+tab_criterios <- data.frame(
+  Modelo = c("Weibull"),
+  AIC = c(AIC(modelo_weibull)
+  ),
+  BIC = c(BIC(modelo_weibull)
+  )
+)
+
+tab_criterios
+
+# AICc #
+
+# definindo n e k
+
+n <- nrow(tree)
+
+k_weibull <- length(coef(modelo_weibull)) + 1
+
+AICc <- function(modelo, k, n){
+  aic <- AIC(modelo)
+  aic + (2*k*(k+1))/(n-k-1)
+}
+
+AICc(modelo_weibull, k_weibull, n)
+
+# A análise descritiva e exploratória dos dados permitiu caracterizar o comportamento
+# inicial da sobrevivência das mudas e identificar possíveis fatores associados ao 
+# tempo até a ocorrência do evento de interesse. A inspeção dos gráficos TTT e da 
+# função de risco acumulado indicou um comportamento compatível com uma taxa de falha
+# crescente ao longo do tempo, sugerindo que distribuições paramétricas capazes de 
+# acomodar esse padrão constituem alternativas adequadas para a modelagem dos dados. 
+# Dessa forma, nas etapas seguintes serão avaliados modelos assumindo as distribuições
+# de Weibull e Gama, visando identificar aquela que melhor descreve o processo de 
+# sobrevivência observado. Além disso, a variável Subplot não apresentou evidências
+# de associação com a sobrevivência durante a análise exploratória, sendo, portanto,
+# desconsiderada nas etapas subsequentes de modelagem, de modo a favorecer um modelo
+# mais parcimonioso sem perda significativa de informação.
