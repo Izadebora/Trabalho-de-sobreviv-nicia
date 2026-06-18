@@ -51,7 +51,7 @@ teste_plot <- survdiff(Surv(Time, Event) ~ Plot, data = tree);teste_plot
 
 km_subplot <- survfit(Surv(Time, Event) ~ Subplot, data = tree, conf.int = F)
 summary(km_subplot)
-teste_subplot <- survdiff(Surv(Time, Event) ~ Subplot, data = tree);teste_subplot
+teste_subplot <- survdiff(Surv(Time, Event) ~ Subplot, rho = 1, data = tree);teste_subplot
 plot(km_subplot, conf.int = F, col = rainbow(5), lty = 2)
 legend(
   "bottomleft",
@@ -61,7 +61,7 @@ legend(
   bty = "n",
   cex = 0.8
 )
-# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor de 0.8) e do 
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor de 0.8) e do  (pelo teste de wilcoxom p-valor=0.6)
 # grafico de sobrevivencia, as diferentes categorias desta variavel nao diferem,
 # portanto nao devem ser consideradas para analises futuras
 
@@ -69,7 +69,7 @@ legend(
 
 km_especie <- survfit(Surv(Time, Event) ~ Species, data = tree, conf.int = F)
 summary(km_especie)
-teste_especie <- survdiff(Surv(Time, Event) ~ Species, data = tree); teste_especie
+teste_especie <- survdiff(Surv(Time, Event) ~ Species,rho = 1, data = tree); teste_especie
 plot(km_especie, conf.int = F, col = rainbow(4), lty = 2)
 legend(
   "bottomleft",
@@ -79,7 +79,7 @@ legend(
   bty = "n",
   cex = 0.8
 )
-# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do
 # grafico de sobrevivencia, existe evidencia de que ao menos uma categoria desta
 # variavel difere das demais, portanto deve ser considerada para analises futuras.
 # Uma coisa interessante e que existe "duplas" no grafico, mostrando que duas duplas
@@ -89,7 +89,7 @@ legend(
 
 km_luz <- survfit(Surv(Time, Event) ~ Light_Cat, data = tree, conf.int = F)
 summary(km_luz)
-teste_luz <- survdiff(Surv(Time, Event) ~ Light_Cat, data = tree); teste_luz
+teste_luz <- survdiff(Surv(Time, Event) ~ Light_Cat,rho = 1, data = tree); teste_luz
 plot(km_luz, conf.int = F, col = rainbow(3), lty = 2)
 legend(
   "bottomleft",
@@ -99,7 +99,7 @@ legend(
   bty = "n",
   cex = 0.8
 )
-# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor = 0.1) e do 
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor = 0.1) e do (pelo teste de wilcoxom p-valor=0.2)
 # grafico de sobrevivencia, existe evidencia, apesar de pouca, de que ao menos uma categoria desta
 # variavel difere das demais, portanto deve ser considerada para analises futuras.
 
@@ -107,7 +107,7 @@ legend(
 
 km_core <- survfit(Surv(Time, Event) ~ Core, data = tree, conf.int = F)
 summary(km_core)
-teste_core <- survdiff(Surv(Time, Event) ~ Core, data = tree); teste_core
+teste_core <- survdiff(Surv(Time, Event) ~ Core, rho = 1, data = tree); teste_core
 plot(km_core, conf.int = F, col = rainbow(2), lty = 2)
 legend(
   "bottomleft",
@@ -117,7 +117,7 @@ legend(
   bty = "n",
   cex = 0.8
 )
-# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do 
+# Pode-se perceber que, pelo teste de comparacao de curvas (p-valor < 0.05) e do (pelo teste de wilcoxom p-valor=0.06)
 # grafico de sobrevivencia, existe evidencia de que as categorias desta
 # variavel diferem, portanto deve ser considerada para analises futuras.
 
@@ -125,7 +125,7 @@ legend(
 
 km_solo <- survfit(Surv(Time, Event) ~ Soil, data = tree, conf.int = F)
 summary(km_solo)
-teste_solo <- survdiff(Surv(Time, Event) ~ Soil, data = tree); teste_solo
+teste_solo <- survdiff(Surv(Time, Event) ~ Soil, rho = 1, data = tree); teste_solo
 plot(km_solo, conf.int = F, col = rainbow(7), lty = 2)
 legend(
   "bottomleft",
@@ -145,7 +145,7 @@ legend(
 
 km_este <- survfit(Surv(Time, Event) ~ Sterile, data = tree, conf.int = F)
 summary(km_este)
-teste_este <- survdiff(Surv(Time, Event) ~ Sterile, data = tree); teste_este
+teste_este <- survdiff(Surv(Time, Event) ~ Sterile, rho = 1, data = tree); teste_este
 plot(km_este, conf.int = F, col = rainbow(2), lty = 2)
 legend(
   "bottomleft",
@@ -163,7 +163,7 @@ legend(
 
 km_conspecific <- survfit(Surv(Time, Event) ~ Conspecific, data = tree, conf.int = F)
 summary(km_conspecific)
-teste_conspecific <- survdiff(Surv(Time, Event) ~ Conspecific, data = tree); teste_conspecific
+teste_conspecific <- survdiff(Surv(Time, Event) ~ Conspecific, rho = 1, data = tree); teste_conspecific
 plot(km_conspecific, conf.int = F, col = rainbow(3), lty = 2)
 legend(
   "bottomleft",
@@ -181,7 +181,7 @@ legend(
 
 km_myco <- survfit(Surv(Time, Event) ~ Myco, data = tree, conf.int = F)
 summary(km_myco)
-teste_myco <- survdiff(Surv(Time, Event) ~ Myco , data = tree); teste_myco
+teste_myco <- survdiff(Surv(Time, Event) ~ Myco , rho = 0, data = tree); teste_myco
 plot(km_myco, conf.int = F, col = rainbow(2), lty = 2)
 legend(
   "bottomleft",
@@ -199,7 +199,7 @@ legend(
 
 km_soilmyco <- survfit(Surv(Time, Event) ~ SoilMyco, data = tree, conf.int = F)
 summary(km_soilmyco)
-teste_soilmyco <- survdiff(Surv(Time, Event) ~ SoilMyco, data = tree); teste_soilmyco
+teste_soilmyco <- survdiff(Surv(Time, Event) ~ SoilMyco, rho = 1, data = tree); teste_soilmyco
 plot(km_soilmyco, conf.int = F, col = rainbow(3), lty = 2)
 legend(
   "bottomleft",
@@ -223,6 +223,8 @@ legend(
 
 modelo_weibull <- survreg(Surv(Time, Event) ~ 1, data = tree, dist = "weibull"); summary(modelo_weibull)
 
+modelo_loglogi <- survreg(Surv(Time, Event) ~ 1, data = tree, dist = "loglogistic"); summary(modelo_loglogi)
+
 ## METODO GRAFICO ##
 
 # TEMPO #
@@ -236,6 +238,13 @@ alphaW <- exp(coef(modelo_weibull))
 
 sW <- exp(-(tempo/alphaW)^gammaW)
 
+# LOG LOGISTIC #
+
+gammaLL <- 1/modelo_loglogi$scale
+alphaLL <- exp(coef(modelo_loglogi))
+
+sLL <- 1/(1 + (tempo/alphaLL)^gammaLL)
+
 # GAMMA #
 
 # GRAFICO DE COMPARACAO #
@@ -248,25 +257,26 @@ plot(km,
      lwd = 2)
 
 lines(tempo, sW, col = "blue", lwd = 2)
-#lines(tempo, sG, col = "purple", lwd = 2)
+lines(tempo, sLL, col = "red", lwd = 2)
+
+# Log-logística
 
 legend("topright",
        legend = c("Kaplan-Meier",
-                  "Weibull"),
-       col = c("black",
-               "blue"),
-       lwd = 2,
-       bty = "n")
+                  "Weibull",
+                  "Log-Logística"),
+       col = c("black", "blue", "red"),
+       lwd = 2)
 
 ## AIC, BIC, AICc ##
 
 # AIC e BIC #
 
 tab_criterios <- data.frame(
-  Modelo = c("Weibull"),
-  AIC = c(AIC(modelo_weibull)
+  Modelo = c("Weibull", "loglogistc"),
+  AIC = c(AIC(modelo_weibull, modelo_loglogi)
   ),
-  BIC = c(BIC(modelo_weibull)
+  BIC = c(BIC(modelo_weibull, modelo_loglogi)
   )
 )
 
