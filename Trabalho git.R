@@ -5,6 +5,7 @@
 library(tidyverse)
 library(survival)
 library(AdequacyModel)
+library(flexsurv)
 
 #### DADOS ####
 
@@ -215,21 +216,74 @@ legend(
 
 ### CONCLUSAO DA ANALISE DESCRITIVA E EXPLORATORIA ###
 
+# A análise descritiva e exploratória dos dados permitiu caracterizar o comportamento
+# inicial da sobrevivência das mudas e identificar possíveis fatores associados ao 
+# tempo até a ocorrência do evento de interesse. A inspeção dos gráficos TTT e da 
+# função de risco acumulado indicou um comportamento compatível com uma taxa de falha
+# crescente ao longo do tempo, sugerindo que distribuições paramétricas capazes de 
+# acomodar esse padrão constituem alternativas adequadas para a modelagem dos dados. 
+# Dessa forma, nas etapas seguintes serão avaliados modelos assumindo a distribuição
+# de Gama Generalizada, visando identificar aquela que melhor descreve o processo de 
+# sobrevivência observado. Além disso, a variável Subplot não apresentou evidências
+# de associação com a sobrevivência durante a análise exploratória, sendo, portanto,
+# desconsiderada nas etapas subsequentes de modelagem, de modo a favorecer um modelo
+# mais parcimonioso sem perda significativa de informação.
+
 #### MODELAGEM ####
 
-### ESTIMACAO ###
+tree$Plot <- as.factor(tree$Plot)
+tree$Species <- as.factor(tree$Species)
+tree$Light_Cat <- as.factor(tree$Light_Cat)
+tree$Core <- as.factor(tree$Core)
+tree$Soil <- as.factor(tree$Soil)
+tree$Sterile <- as.factor(tree$Sterile)
+tree$Conspecific <- as.factor(tree$Conspecific)
+tree$Myco <- as.factor(tree$Myco)
+tree$SoilMyco <- as.factor(tree$SoilMyco)
 
 ## SURVREG ##
 
-modelo_weibull <- survreg(Surv(Time, Event) ~ 1, data = tree, dist = "weibull"); summary(modelo_weibull)
+modelo_weibull <- survreg(Surv(Time, Event) ~ 1,
+                          data = tree,
+                          dist = "weibull")
 
-modelo_loglogi <- survreg(Surv(Time, Event) ~ 1, data = tree, dist = "loglogistic"); summary(modelo_loglogi)
+modelo_logweibull <- survreg(Surv(log(Time), Event) ~ 1,
+                             data = tree,
+                             dist = "extreme")
+
+modelo_exp <- survreg(Surv(Time, Event) ~ 1,
+                      data = tree,
+                      dist = "exponential")
+
+modelo_lognormal <- survreg(Surv(Time, Event) ~ 1,
+                            data = tree,
+                            dist = "lognormal")
+
+modelo_loglogi <- survreg(Surv(Time, Event) ~ 1,
+                          data = tree,
+                          dist = "loglogistic")
+
+## FLEXSURV ##
+
+modelo_gamma <- flexsurvreg(Surv(Time, Event) ~ 1,
+                            data = tree,
+                            dist = "gamma")
+
+modelo_gengamma <- flexsurvreg(Surv(Time, Event) ~ 1,
+                               data = tree,
+                               dist = "gengamma")
 
 ## METODO GRAFICO ##
 
 # TEMPO #
 
-tempo <- seq(0, max(tree$Time))
+tempo <- seq(0, max(tree$Time), by = 0.1)
+
+# EXPONENCIAL #
+
+alphaE <- exp(coef(modelo_exp))
+
+sE <- exp(-tempo/alphaE)
 
 # WEIBULL #
 
@@ -237,6 +291,14 @@ gammaW <- 1/modelo_weibull$scale
 alphaW <- exp(coef(modelo_weibull))
 
 sW <- exp(-(tempo/alphaW)^gammaW)
+
+# LOG NORMAL #
+
+muLN <- coef(modelo_lognormal)
+sigmaLN <- modelo_lognormal$scale
+
+sLN <- 1 - pnorm((log(tempo) - muLN)/sigmaLN)
+sLN[1] <- 1
 
 # LOG LOGISTIC #
 
@@ -247,6 +309,16 @@ sLL <- 1/(1 + (tempo/alphaLL)^gammaLL)
 
 # GAMMA #
 
+sGamma <- summary(modelo_gamma,
+                  t = tempo,
+                  type = "survival")[[1]]$est
+
+# GAMA GENERALIZADA #
+
+sGG <- summary(modelo_gengamma,
+               t = tempo,
+               type = "survival")[[1]]$est
+
 # GRAFICO DE COMPARACAO #
 
 plot(km,
@@ -256,28 +328,56 @@ plot(km,
      col = "black",
      lwd = 2)
 
+lines(tempo, sE, col = "orange", lwd = 2)
 lines(tempo, sW, col = "blue", lwd = 2)
+lines(tempo, sLN, col = "darkgreen", lwd = 2)
 lines(tempo, sLL, col = "red", lwd = 2)
+lines(tempo, sGamma, col = "purple", lwd = 2)
+lines(tempo, sGG, col = "brown", lwd = 2)
 
-# Log-logística
-
-legend("topright",
+legend("bottomleft",
        legend = c("Kaplan-Meier",
+                  "Exponencial",
                   "Weibull",
-                  "Log-Logística"),
-       col = c("black", "blue", "red"),
-       lwd = 2)
+                  "Log-normal",
+                  "Log-Logística",
+                  "Gamma",
+                  "Gamma Generalizada"),
+       col = c("black",
+               "orange",
+               "blue",
+               "darkgreen",
+               "red",
+               "purple",
+               "brown"),
+       lwd = 2,
+       cex = 0.7)
 
 ## AIC, BIC, AICc ##
 
 # AIC e BIC #
 
 tab_criterios <- data.frame(
-  Modelo = c("Weibull", "loglogistc"),
-  AIC = c(AIC(modelo_weibull, modelo_loglogi)
-  ),
-  BIC = c(BIC(modelo_weibull, modelo_loglogi)
-  )
+  Modelo = c("Exponencial",
+             "Weibull",
+             "Log-normal",
+             "Log-logística",
+             "Gamma",
+             "Gamma Generalizada"),
+  
+  AIC = c(AIC(modelo_exp),
+          AIC(modelo_weibull),
+          AIC(modelo_lognormal),
+          AIC(modelo_loglogi),
+          modelo_gamma$AIC,
+          modelo_gengamma$AIC),
+  
+  BIC = c(BIC(modelo_exp),
+          BIC(modelo_weibull),
+          BIC(modelo_lognormal),
+          BIC(modelo_loglogi),
+          modelo_gamma$BIC,
+          modelo_gengamma$BIC)
 )
 
 tab_criterios
@@ -288,24 +388,130 @@ tab_criterios
 
 n <- nrow(tree)
 
+k_exp <- length(coef(modelo_exp)) + 1
+
 k_weibull <- length(coef(modelo_weibull)) + 1
+
+k_lognormal <- length(coef(modelo_lognormal)) + 1
+
+k_loglogi <- length(coef(modelo_loglogi)) + 1
+
+k_gamma <- length(modelo_gamma$res.t)
+
+k_gengamma <- length(modelo_gengamma$res.t)
 
 AICc <- function(modelo, k, n){
   aic <- AIC(modelo)
   aic + (2*k*(k+1))/(n-k-1)
 }
 
-AICc(modelo_weibull, k_weibull, n)
+tab_criterios$AICc <- c(
+  AICc(modelo_exp, k_exp, n),
+  AICc(modelo_weibull, k_weibull, n),
+  AICc(modelo_lognormal, k_lognormal, n),
+  AICc(modelo_loglogi, k_loglogi, n),
+  AICc(modelo_gamma, k_gamma, n),
+  AICc(modelo_gengamma, k_gengamma, n)
+)
 
-# A análise descritiva e exploratória dos dados permitiu caracterizar o comportamento
-# inicial da sobrevivência das mudas e identificar possíveis fatores associados ao 
-# tempo até a ocorrência do evento de interesse. A inspeção dos gráficos TTT e da 
-# função de risco acumulado indicou um comportamento compatível com uma taxa de falha
-# crescente ao longo do tempo, sugerindo que distribuições paramétricas capazes de 
-# acomodar esse padrão constituem alternativas adequadas para a modelagem dos dados. 
-# Dessa forma, nas etapas seguintes serão avaliados modelos assumindo as distribuições
-# de Weibull e Gama, visando identificar aquela que melhor descreve o processo de 
-# sobrevivência observado. Além disso, a variável Subplot não apresentou evidências
-# de associação com a sobrevivência durante a análise exploratória, sendo, portanto,
-# desconsiderada nas etapas subsequentes de modelagem, de modo a favorecer um modelo
-# mais parcimonioso sem perda significativa de informação.
+tab_criterios
+
+### SELECAO DE COVARIAVEIS ###
+
+modelo_gengamma
+
+## PARA CADA COVARIAVEL ##
+
+teste_variavel <- function(data, variavel, dist = "gengamma") {
+  
+  # Modelo nulo
+  form0 <- as.formula("Surv(Time, Event) ~ 1")
+  
+  # Modelo com a variavel
+  form1 <- as.formula(paste("Surv(Time, Event) ~", variavel))
+  
+  modelo0 <- flexsurvreg(form0,
+                         data = data,
+                         dist = dist)
+  
+  modelo1 <- flexsurvreg(form1,
+                         data = data,
+                         dist = dist)
+  
+  LR <- 2 * (modelo1$loglik - modelo0$loglik)
+  
+  gl <- modelo1$npars - modelo0$npars
+  
+  p <- pchisq(LR, df = gl, lower.tail = FALSE)
+  
+  data.frame(
+    Variavel = variavel,
+    Distribuicao = dist,
+    LogLik_Nulo = modelo0$loglik,
+    LogLik_Modelo = modelo1$loglik,
+    TRV = LR,
+    gl = gl,
+    p.valor = p,
+    AIC_Nulo = modelo0$AIC,
+    AIC_Modelo = modelo1$AIC
+  )
+}
+
+# PLOT #
+
+modelo_gengamma_plot <- flexsurvreg(Surv(Time, Event) ~ Plot, data = tree, dist = "gengamma")
+modelo_gengamma_plot
+teste_variavel(tree, "Plot", "gengamma")
+
+# ESPECIE #
+
+modelo_gengamma_especie <- flexsurvreg(Surv(Time, Event) ~ Species, data = tree, dist = "gengamma")
+modelo_gengamma_especie
+teste_variavel(tree, "Species", "gengamma")
+
+# LUZ #
+
+modelo_gengamma_luz <- flexsurvreg(Surv(Time, Event) ~ Light_Cat, data = tree, dist = "gengamma")
+modelo_gengamma_luz
+teste_variavel(tree, "Light_Cat", "gengamma")
+
+# CORE #
+
+modelo_gengamma_core <- flexsurvreg(Surv(Time, Event) ~ Core, data = tree, dist = "gengamma")
+modelo_gengamma_core
+teste_variavel(tree, "Core", "gengamma")
+
+# SOLO #
+
+modelo_gengamma_solo <- flexsurvreg(Surv(Time, Event) ~ Soil, data = tree, dist = "gengamma")
+modelo_gengamma_solo
+teste_variavel(tree, "Soil", "gengamma")
+
+# ESTERELIZACAO #
+
+modelo_gengamma_este <- flexsurvreg(Surv(Time, Event) ~ Sterile, data = tree, dist = "gengamma")
+modelo_gengamma_este
+teste_variavel(tree, "Sterile", "gengamma")
+
+# MYCO #
+
+modelo_gengamma_myco <- flexsurvreg(Surv(Time, Event) ~ Myco, data = tree, dist = "gengamma")
+modelo_gengamma_myco
+teste_variavel(tree, "Myco", "gengamma")
+
+# SOILMYCO #
+
+modelo_gengamma_soilmyco <- flexsurvreg(Surv(Time, Event) ~ SoilMyco, data = tree, dist = "gengamma")
+modelo_gengamma_soilmyco
+teste_variavel(tree, "SoilMyco", "gengamma")
+
+## RETIRANDO UMA POR VEZ ##
+
+modelo_completo <- flexsurvreg(
+  Surv(Time, Event) ~ Species + Soil + Sterile + Conspecific + Myco + SoilMyco,
+  data = tree,
+  dist = "gengamma"
+)
+
+## COX SNELL ##
+
